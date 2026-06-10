@@ -1146,6 +1146,29 @@ impl AuthManagerConfig for Config {
     fn chatgpt_base_url(&self) -> String {
         self.chatgpt_base_url.clone()
     }
+
+    fn agent_identity_authapi_base_url(&self) -> Option<String> {
+        let chatgpt_base_url = self.chatgpt_base_url.trim_end_matches('/');
+        match chatgpt_base_url {
+            "https://chatgpt.com"
+            | "https://chatgpt.com/backend-api"
+            | "https://chatgpt.com/codex"
+            | "https://chatgpt.com/backend-api/codex"
+            | "https://chat.openai.com"
+            | "https://chat.openai.com/backend-api"
+            | "https://chat.openai.com/codex"
+            | "https://chat.openai.com/backend-api/codex" => {
+                Some("https://auth.openai.com/api/accounts".to_string())
+            }
+            "https://chatgpt-staging.com"
+            | "https://chatgpt-staging.com/backend-api"
+            | "https://chatgpt-staging.com/codex"
+            | "https://chatgpt-staging.com/backend-api/codex" => {
+                Some("https://auth.api.openai.org/api/accounts".to_string())
+            }
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Default)]
