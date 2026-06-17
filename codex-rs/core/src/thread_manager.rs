@@ -917,6 +917,30 @@ impl ThreadManager {
             history,
             thread_source,
             parent_trace,
+            /*initial_rollout_copy*/ None,
+        )
+        .await
+    }
+
+    pub async fn fork_thread_from_history_with_initial_rollout_copy<S>(
+        &self,
+        snapshot: S,
+        config: Config,
+        history: InitialHistory,
+        thread_source: Option<ThreadSource>,
+        parent_trace: Option<W3cTraceContext>,
+        initial_rollout_copy: PathBuf,
+    ) -> CodexResult<NewThread>
+    where
+        S: Into<ForkSnapshot>,
+    {
+        self.fork_thread_with_initial_history(
+            snapshot.into(),
+            config,
+            history,
+            thread_source,
+            parent_trace,
+            Some(initial_rollout_copy),
         )
         .await
     }
@@ -928,6 +952,7 @@ impl ThreadManager {
         history: InitialHistory,
         thread_source: Option<ThreadSource>,
         parent_trace: Option<W3cTraceContext>,
+        initial_rollout_copy: Option<PathBuf>,
     ) -> CodexResult<NewThread> {
         // `forked_from_id()` describes this history's existing lineage. When
         // forking a resumed thread, the child copies the resumed thread itself.
@@ -953,21 +978,28 @@ impl ThreadManager {
             self.state.environment_manager.as_ref(),
             &config.cwd,
         );
-        Box::pin(self.state.spawn_thread(
-            config,
-            history,
-            Arc::clone(&self.state.auth_manager),
-            self.agent_control(),
-            /*parent_thread_id*/ None,
-            forked_from_thread_id,
-            thread_source,
-            Vec::new(),
-            /*metrics_service_name*/ None,
-            parent_trace,
-            environments,
-            /*thread_extension_init*/ ExtensionDataInit::default(),
-            /*user_shell_override*/ None,
-        ))
+        Box::pin(
+            self.state
+                .spawn_thread_with_source_and_initial_rollout_copy(
+                    config,
+                    history,
+                    Arc::clone(&self.state.auth_manager),
+                    self.agent_control(),
+                    self.state.session_source.clone(),
+                    /*parent_thread_id*/ None,
+                    forked_from_thread_id,
+                    thread_source,
+                    Vec::new(),
+                    /*metrics_service_name*/ None,
+                    /*inherited_shell_snapshot*/ None,
+                    /*inherited_exec_policy*/ None,
+                    parent_trace,
+                    environments,
+                    /*thread_extension_init*/ ExtensionDataInit::default(),
+                    /*user_shell_override*/ None,
+                    initial_rollout_copy,
+                ),
+        )
         .await
     }
 
@@ -1361,6 +1393,49 @@ impl ThreadManagerState {
         thread_extension_init: ExtensionDataInit,
         user_shell_override: Option<crate::shell::Shell>,
     ) -> CodexResult<NewThread> {
+        Box::pin(self.spawn_thread_with_source_and_initial_rollout_copy(
+            config,
+            initial_history,
+            auth_manager,
+            agent_control,
+            session_source,
+            parent_thread_id,
+            forked_from_thread_id,
+            thread_source,
+            dynamic_tools,
+            metrics_service_name,
+            inherited_shell_snapshot,
+            inherited_exec_policy,
+            parent_trace,
+            environments,
+            thread_extension_init,
+            user_shell_override,
+            /*initial_rollout_copy*/ None,
+        ))
+        .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) async fn spawn_thread_with_source_and_initial_rollout_copy(
+        &self,
+        config: Config,
+        initial_history: InitialHistory,
+        auth_manager: Arc<AuthManager>,
+        agent_control: AgentControl,
+        session_source: SessionSource,
+        parent_thread_id: Option<ThreadId>,
+        forked_from_thread_id: Option<ThreadId>,
+        thread_source: Option<ThreadSource>,
+        dynamic_tools: Vec<codex_protocol::dynamic_tools::DynamicToolSpec>,
+        metrics_service_name: Option<String>,
+        inherited_shell_snapshot: Option<Arc<ShellSnapshot>>,
+        inherited_exec_policy: Option<Arc<crate::exec_policy::ExecPolicyManager>>,
+        parent_trace: Option<W3cTraceContext>,
+        environments: Vec<TurnEnvironmentSelection>,
+        thread_extension_init: ExtensionDataInit,
+        user_shell_override: Option<crate::shell::Shell>,
+        initial_rollout_copy: Option<PathBuf>,
+    ) -> CodexResult<NewThread> {
         let is_resumed_thread = matches!(&initial_history, InitialHistory::Resumed(_));
         if let InitialHistory::Resumed(resumed) = &initial_history {
             let mut threads = self.threads.write().await;
@@ -1417,6 +1492,7 @@ impl ThreadManagerState {
             conversation_history: initial_history,
             session_source,
             forked_from_thread_id,
+            initial_rollout_copy,
             parent_thread_id,
             thread_source,
             agent_control,
