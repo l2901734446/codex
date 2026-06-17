@@ -643,6 +643,7 @@ impl ThreadManager {
             options.parent_trace,
             options.environments,
             options.thread_extension_init,
+            /*include_initial_messages*/ true,
             /*user_shell_override*/ None,
         ))
         .await
@@ -710,6 +711,42 @@ impl ThreadManager {
         auth_manager: Arc<AuthManager>,
         parent_trace: Option<W3cTraceContext>,
     ) -> CodexResult<NewThread> {
+        self.resume_thread_with_history_inner(
+            config,
+            initial_history,
+            auth_manager,
+            parent_trace,
+            /*include_initial_messages*/ true,
+        )
+        .await
+    }
+
+    #[instrument(level = "trace", skip_all)]
+    pub async fn resume_thread_with_history_without_initial_messages(
+        &self,
+        config: Config,
+        initial_history: InitialHistory,
+        auth_manager: Arc<AuthManager>,
+        parent_trace: Option<W3cTraceContext>,
+    ) -> CodexResult<NewThread> {
+        self.resume_thread_with_history_inner(
+            config,
+            initial_history,
+            auth_manager,
+            parent_trace,
+            /*include_initial_messages*/ false,
+        )
+        .await
+    }
+
+    async fn resume_thread_with_history_inner(
+        &self,
+        config: Config,
+        initial_history: InitialHistory,
+        auth_manager: Arc<AuthManager>,
+        parent_trace: Option<W3cTraceContext>,
+        include_initial_messages: bool,
+    ) -> CodexResult<NewThread> {
         let environments = default_thread_environment_selections(
             self.state.environment_manager.as_ref(),
             &config.cwd,
@@ -733,6 +770,7 @@ impl ThreadManager {
             parent_trace,
             environments,
             /*thread_extension_init*/ ExtensionDataInit::default(),
+            include_initial_messages,
             /*user_shell_override*/ None,
         ))
         .await
@@ -760,6 +798,7 @@ impl ThreadManager {
             /*parent_trace*/ None,
             environments,
             /*thread_extension_init*/ ExtensionDataInit::default(),
+            /*include_initial_messages*/ true,
             /*user_shell_override*/ Some(user_shell_override),
         ))
         .await
@@ -796,6 +835,7 @@ impl ThreadManager {
             /*parent_trace*/ None,
             environments,
             /*thread_extension_init*/ ExtensionDataInit::default(),
+            /*include_initial_messages*/ true,
             /*user_shell_override*/ Some(user_shell_override),
         ))
         .await
@@ -965,6 +1005,7 @@ impl ThreadManager {
             parent_trace,
             environments,
             /*thread_extension_init*/ ExtensionDataInit::default(),
+            /*include_initial_messages*/ true,
             /*user_shell_override*/ None,
         ))
         .await
@@ -1221,6 +1262,7 @@ impl ThreadManagerState {
             /*parent_trace*/ None,
             environments,
             /*thread_extension_init*/ ExtensionDataInit::default(),
+            /*include_initial_messages*/ true,
             /*user_shell_override*/ None,
         ))
         .await
@@ -1258,6 +1300,7 @@ impl ThreadManagerState {
             /*parent_trace*/ None,
             environments,
             /*thread_extension_init*/ ExtensionDataInit::default(),
+            /*include_initial_messages*/ true,
             /*user_shell_override*/ None,
         ))
         .await
@@ -1296,6 +1339,7 @@ impl ThreadManagerState {
             /*parent_trace*/ None,
             environments,
             /*thread_extension_init*/ ExtensionDataInit::default(),
+            /*include_initial_messages*/ true,
             /*user_shell_override*/ None,
         ))
         .await
@@ -1317,6 +1361,7 @@ impl ThreadManagerState {
         parent_trace: Option<W3cTraceContext>,
         environments: Vec<TurnEnvironmentSelection>,
         thread_extension_init: ExtensionDataInit,
+        include_initial_messages: bool,
         user_shell_override: Option<crate::shell::Shell>,
     ) -> CodexResult<NewThread> {
         Box::pin(self.spawn_thread_with_source(
@@ -1335,6 +1380,7 @@ impl ThreadManagerState {
             parent_trace,
             environments,
             thread_extension_init,
+            include_initial_messages,
             user_shell_override,
         ))
         .await
@@ -1358,6 +1404,7 @@ impl ThreadManagerState {
         parent_trace: Option<W3cTraceContext>,
         environments: Vec<TurnEnvironmentSelection>,
         thread_extension_init: ExtensionDataInit,
+        include_initial_messages: bool,
         user_shell_override: Option<crate::shell::Shell>,
     ) -> CodexResult<NewThread> {
         let is_resumed_thread = matches!(&initial_history, InitialHistory::Resumed(_));
@@ -1411,6 +1458,7 @@ impl ThreadManagerState {
             mcp_manager: Arc::clone(&self.mcp_manager),
             extensions: Arc::clone(&self.extensions),
             conversation_history: initial_history,
+            include_initial_messages,
             session_source,
             forked_from_thread_id,
             parent_thread_id,

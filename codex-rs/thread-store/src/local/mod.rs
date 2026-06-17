@@ -642,6 +642,7 @@ mod tests {
                 thread_id,
                 rollout_path: Some(rollout_path),
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: false,
                 metadata: ThreadPersistenceMetadata {
                     cwd: Some(home.path().to_path_buf()),
@@ -696,6 +697,7 @@ mod tests {
                 thread_id,
                 rollout_path: Some(rollout_path),
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: false,
                 metadata: ThreadPersistenceMetadata {
                     cwd: Some(home.path().to_path_buf()),
@@ -825,6 +827,7 @@ mod tests {
                 thread_id,
                 rollout_path: None,
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: true,
                 metadata: thread_metadata(),
             })
@@ -885,6 +888,7 @@ mod tests {
                 thread_id,
                 rollout_path: Some(rollout_path),
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: true,
                 metadata: thread_metadata(),
             })
@@ -907,6 +911,7 @@ mod tests {
                 thread_id,
                 rollout_path: Some(rollout_path),
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: true,
                 metadata: ThreadPersistenceMetadata {
                     cwd: None,
@@ -936,6 +941,7 @@ mod tests {
                 thread_id,
                 rollout_path: Some(rollout_path),
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: true,
                 metadata: thread_metadata(),
             })
@@ -984,6 +990,7 @@ mod tests {
                 thread_id,
                 rollout_path: Some(rollout_path.clone()),
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: true,
                 metadata: thread_metadata(),
             })
@@ -1022,6 +1029,7 @@ mod tests {
                 thread_id,
                 rollout_path: Some(rollout_path),
                 history: None,
+                defer_metadata_history_load: false,
                 include_archived: true,
                 metadata: thread_metadata(),
             })
