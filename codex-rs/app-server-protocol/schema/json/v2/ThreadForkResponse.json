@@ -538,7 +538,7 @@
     },
     "McpToolCallAppContext": {
       "properties": {
-        "id": {
+        "connectorId": {
           "type": "string"
         },
         "linkId": {
@@ -555,7 +555,7 @@
         }
       },
       "required": [
-        "id"
+        "connectorId"
       ],
       "type": "object"
     },
