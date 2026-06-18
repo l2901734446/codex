@@ -67,13 +67,22 @@ impl InitializeRequestProcessor {
         // experimental API). Proposed direction is instance-global first-write-wins
         // with initialize-time mismatch rejection.
         let analytics_initialize_params = params.clone();
-        let capabilities = params.capabilities.unwrap_or_default();
-        let experimental_api_enabled = capabilities.experimental_api;
-        let request_attestation = capabilities.request_attestation;
-        let request_current_time = capabilities.request_current_time;
-        let opt_out_notification_methods = capabilities
-            .opt_out_notification_methods
-            .unwrap_or_default();
+        let (
+            experimental_api_enabled,
+            request_attestation,
+            request_current_time,
+            opt_out_notification_methods,
+        ) = match params.capabilities {
+            Some(capabilities) => (
+                capabilities.experimental_api,
+                capabilities.request_attestation,
+                capabilities.request_current_time,
+                capabilities
+                    .opt_out_notification_methods
+                    .unwrap_or_default(),
+            ),
+            None => (false, false, false, Vec::new()),
+        };
         let ClientInfo {
             name,
             title: _title,
