@@ -113,7 +113,8 @@ struct PowershellParserProcess {
 
 impl PowershellParserProcess {
     fn spawn(executable: &str) -> std::io::Result<Self> {
-        let mut child = Command::new(executable)
+        let mut command = Command::new(executable);
+        command
             .args([
                 "-NoLogo",
                 "-NoProfile",
@@ -123,8 +124,21 @@ impl PowershellParserProcess {
             ])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null())
-            .spawn()?;
+            .stderr(Stdio::null());
+
+        // Suppress the visible console window on Windows. This long-lived
+        // parser process is spawned without an existing console, so without
+        // `CREATE_NO_WINDOW` Windows briefly allocates a conhost window for it
+        // — one of the sources of the black-window flash reported in
+        // openai/codex#18984, #26613.
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            // CREATE_NO_WINDOW = 0x08000000
+            command.creation_flags(0x0800_0000);
+        }
+
+        let mut child = command.spawn()?;
         let stdin = match take_child_stdin(&mut child) {
             Ok(stdin) => stdin,
             Err(error) => {

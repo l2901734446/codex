@@ -69,6 +69,24 @@ pub(crate) async fn spawn_child_async(request: SpawnChildRequest<'_>) -> std::io
     cmd.arg0(arg0.map_or_else(|| program.to_string_lossy().to_string(), String::from));
     cmd.args(args);
     cmd.current_dir(cwd);
+
+    // On Windows, suppress the briefly-visible console window (conhost) that
+    // `CreateProcess` allocates for console-subsystem children when the parent
+    // process itself has no console (e.g. the Codex app-server running inside
+    // Electron). Without `CREATE_NO_WINDOW`, every `shell` tool call flashes a
+    // black PowerShell/cmd window on screen. See openai/codex#18984, #23892,
+    // #24910, #26613.
+    //
+    // `tokio::process::Command` does not implement `CommandExt` itself, so we
+    // configure the flag on the underlying `std::process::Command` via
+    // `as_std_mut`.
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        // CREATE_NO_WINDOW = 0x08000000
+        cmd.as_std_mut().creation_flags(0x0800_0000);
+    }
+
     if let Some(network) = network {
         network.apply_to_env(&mut env);
     }
