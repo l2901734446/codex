@@ -12103,6 +12103,12 @@
               "string",
               "null"
             ]
+          },
+          "mcpAppResourceUri": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -17575,6 +17581,7 @@
                 "type": "string"
               },
               "mcpAppResourceUri": {
+                "description": "Deprecated: use `appContext.mcpAppResourceUri` instead.",
                 "type": [
                   "string",
                   "null"
