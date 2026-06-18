@@ -439,6 +439,7 @@ async fn start_thread_seeds_extension_data_for_mcp_and_lifecycle_contributors() 
         /*state_db*/ None,
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
     let selected_root_init = |id: &str, environment_id: &str| {
         let mut init = codex_extension_api::ExtensionDataInit::new();
@@ -545,6 +546,7 @@ async fn resume_and_fork_do_not_restore_thread_environments_from_rollout() {
         /*state_db*/ None,
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
     let selected_cwd =
         AbsolutePathBuf::try_from(config.cwd.as_path().join("selected")).expect("absolute path");
@@ -666,6 +668,7 @@ async fn explicit_installation_id_skips_codex_home_file() {
         state_db.clone(),
         installation_id.clone(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let thread = manager
@@ -706,6 +709,7 @@ async fn resume_active_thread_from_rollout_returns_running_thread() {
         /*state_db*/ None,
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let source = manager
@@ -764,6 +768,7 @@ async fn resume_stopped_thread_from_rollout_spawns_new_thread() {
         /*state_db*/ None,
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let source = manager
@@ -829,6 +834,7 @@ async fn resume_stopped_thread_from_rollout_preserves_thread_source() {
         state_db.clone(),
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let source = manager
@@ -920,6 +926,7 @@ async fn rollout_path_resume_and_fork_read_history_through_thread_store() {
         state_db,
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let source = manager
@@ -1022,6 +1029,7 @@ async fn new_uses_active_provider_for_model_refresh() {
         /*state_db*/ None,
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let _ = manager.list_models(RefreshStrategy::Online).await;
@@ -1243,6 +1251,7 @@ async fn interrupted_fork_snapshot_does_not_synthesize_turn_id_for_legacy_histor
         state_db.clone(),
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let source = manager
@@ -1350,6 +1359,7 @@ async fn interrupted_fork_snapshot_preserves_explicit_turn_id() {
         state_db.clone(),
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let source = manager
@@ -1447,6 +1457,7 @@ async fn interrupted_fork_snapshot_uses_persisted_mid_turn_history_without_live_
         state_db.clone(),
         TEST_INSTALLATION_ID.to_string(),
         /*attestation_provider*/ None,
+        /*external_current_time_provider*/ None,
     );
 
     let source = manager

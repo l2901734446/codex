@@ -15,6 +15,7 @@ use anyhow::Result;
 use anyhow::anyhow;
 use codex_config::CloudConfigBundleLoader;
 use codex_core::CodexThread;
+use codex_core::CurrentTimeProvider;
 use codex_core::ThreadManager;
 use codex_core::config::Config;
 use codex_core::resolve_installation_id;
@@ -258,6 +259,7 @@ pub struct TestCodexBuilder {
     exec_server_url: Option<String>,
     extensions: Arc<ExtensionRegistry<Config>>,
     user_instructions_provider: Option<Arc<dyn UserInstructionsProvider>>,
+    current_time_provider: Option<Arc<dyn CurrentTimeProvider>>,
 }
 
 impl TestCodexBuilder {
@@ -351,6 +353,11 @@ impl TestCodexBuilder {
         provider: Arc<dyn UserInstructionsProvider>,
     ) -> Self {
         self.user_instructions_provider = Some(provider);
+        self
+    }
+
+    pub fn with_current_time_provider(mut self, provider: Arc<dyn CurrentTimeProvider>) -> Self {
+        self.current_time_provider = Some(provider);
         self
     }
 
@@ -560,6 +567,7 @@ impl TestCodexBuilder {
             state_db.clone(),
             installation_id,
             /*attestation_provider*/ None,
+            /*external_current_time_provider*/ self.current_time_provider.clone(),
         );
         let thread_manager = Arc::new(thread_manager);
         let user_shell_override = self.user_shell_override.clone();
@@ -1143,6 +1151,7 @@ pub fn test_codex() -> TestCodexBuilder {
         exec_server_url: None,
         extensions: empty_extension_registry(),
         user_instructions_provider: None,
+        current_time_provider: None,
     }
 }
 
