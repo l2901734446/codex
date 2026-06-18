@@ -50,6 +50,9 @@ pub struct InitializeCapabilities {
     /// Opt into `attestation/generate` requests for upstream `x-oai-attestation`.
     #[serde(default)]
     pub request_attestation: bool,
+    /// Opt into `currentTime/read` requests for an external clock.
+    #[serde(default)]
+    pub request_current_time: bool,
     /// Exact notification method names that should be suppressed for this
     /// connection (for example `thread/started`).
     #[ts(optional = nullable)]
