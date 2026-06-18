@@ -2944,7 +2944,6 @@
           "type": "boolean"
         },
         "requestCurrentTime": {
-          "default": false,
           "description": "Opt into `currentTime/read` requests for an external clock.",
           "type": "boolean"
         }

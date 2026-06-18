@@ -2190,7 +2190,6 @@ mod tests {
                     "capabilities": {
                         "experimentalApi": true,
                         "requestAttestation": true,
-                        "requestCurrentTime": false,
                         "optOutNotificationMethods": [
                             "thread/started",
                             "item/agentMessage/delta"

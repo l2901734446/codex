@@ -51,7 +51,7 @@ pub struct InitializeCapabilities {
     #[serde(default)]
     pub request_attestation: bool,
     /// Opt into `currentTime/read` requests for an external clock.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub request_current_time: bool,
     /// Exact notification method names that should be suppressed for this
     /// connection (for example `thread/started`).
