@@ -100,6 +100,7 @@ mod mcp_refresh;
 mod message_processor;
 mod models;
 mod outgoing_message;
+mod permission_presets;
 mod request_processors;
 mod request_serialization;
 mod server_request_error;
