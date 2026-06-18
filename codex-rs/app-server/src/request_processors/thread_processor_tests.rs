@@ -416,7 +416,8 @@ mod thread_processor_behavior_tests {
         ])?;
         std::fs::write(&path, contents)?;
 
-        let items = read_compacted_resume_rollout_items(path.as_path(), thread_id)?
+        let byte_len = std::fs::metadata(path.as_path())?.len();
+        let items = read_compacted_resume_rollout_items(path.as_path(), thread_id, byte_len)?
             .expect("compacted resume items");
 
         assert_eq!(items.len(), 5);
@@ -459,7 +460,10 @@ mod thread_processor_behavior_tests {
         contents.push_str("{not json}\n");
         std::fs::write(&path, contents)?;
 
-        assert!(read_compacted_resume_rollout_items(path.as_path(), thread_id)?.is_none());
+        let byte_len = std::fs::metadata(path.as_path())?.len();
+        assert!(
+            read_compacted_resume_rollout_items(path.as_path(), thread_id, byte_len)?.is_none()
+        );
         Ok(())
     }
 
