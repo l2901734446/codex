@@ -1,5 +1,3 @@
-#![allow(clippy::expect_used)]
-
 use core_test_support::test_codex::local_selections;
 use std::fs;
 
@@ -16,7 +14,6 @@ use codex_protocol::items::TurnItem;
 use codex_protocol::models::ContentItem;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::protocol::ConversationStartParams;
-use codex_protocol::protocol::ErrorEvent;
 use codex_protocol::protocol::EventMsg;
 use codex_protocol::protocol::ItemCompletedEvent;
 use codex_protocol::protocol::ItemStartedEvent;
@@ -160,6 +157,7 @@ fn format_labeled_requests_snapshot(
 
 fn compacted_summary_only_output(summary: &str) -> Vec<ResponseItem> {
     vec![ResponseItem::Compaction {
+        id: None,
         encrypted_content: summary_with_prefix(summary),
         metadata: None,
     }]
@@ -206,8 +204,10 @@ async fn start_realtime_conversation(codex: &codex_core::CodexThread) -> Result<
     codex
         .submit(Op::RealtimeConversationStart(ConversationStartParams {
             architecture: None,
+            client_managed_handoffs: false,
             codex_responses_as_items: false,
             codex_response_item_prefix: None,
+            codex_response_handoff_prefix: None,
             model: None,
             output_modality: RealtimeOutputModality::Audio,
             include_startup_context: true,
@@ -225,7 +225,7 @@ async fn start_realtime_conversation(codex: &codex_core::CodexThread) -> Result<
         _ => None,
     })
     .await
-    .unwrap_or_else(|err: ErrorEvent| panic!("conversation start failed: {err:?}"));
+    .expect("conversation start failed");
 
     wait_for_event_match(codex, |msg| match msg {
         EventMsg::RealtimeConversationRealtime(RealtimeConversationRealtimeEvent {
@@ -332,6 +332,7 @@ async fn remote_compact_replaces_history_for_followups() -> Result<()> {
     .await;
 
     let compacted_history = vec![ResponseItem::Compaction {
+        id: None,
         encrypted_content: "ENCRYPTED_COMPACTION_SUMMARY".to_string(),
         metadata: None,
     }];
@@ -2359,6 +2360,7 @@ async fn remote_compact_persists_replacement_history_in_rollout() -> Result<()> 
 
     let compacted_history = vec![
         ResponseItem::Compaction {
+            id: None,
             encrypted_content: "ENCRYPTED_COMPACTION_SUMMARY".to_string(),
             metadata: None,
         },
@@ -2514,6 +2516,7 @@ async fn remote_compact_and_resume_refresh_stale_developer_instructions() -> Res
             metadata: None,
         },
         ResponseItem::Compaction {
+            id: None,
             encrypted_content: "ENCRYPTED_COMPACTION_SUMMARY".to_string(),
             metadata: None,
         },
@@ -2656,6 +2659,7 @@ async fn remote_compact_refreshes_stale_developer_instructions_without_resume() 
             metadata: None,
         },
         ResponseItem::Compaction {
+            id: None,
             encrypted_content: "ENCRYPTED_COMPACTION_SUMMARY".to_string(),
             metadata: None,
         },
@@ -4062,6 +4066,7 @@ async fn snapshot_request_shape_remote_mid_turn_compaction_summary_only_reinject
     .await;
 
     let compacted_history = vec![ResponseItem::Compaction {
+        id: None,
         encrypted_content: summary_with_prefix("REMOTE_SUMMARY_ONLY"),
         metadata: None,
     }];

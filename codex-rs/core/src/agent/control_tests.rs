@@ -878,7 +878,7 @@ async fn spawn_agent_can_fork_parent_thread_history_with_sanitized_items() {
                 assistant_message("parent final answer", Some(MessagePhase::FinalAnswer)),
                 assistant_message("parent unknown phase", /*phase*/ None),
                 ResponseItem::Reasoning {
-                    id: "parent-reasoning".to_string(),
+                    id: Some("parent-reasoning".to_string()),
                     summary: Vec::new(),
                     content: None,
                     encrypted_content: None,
@@ -2000,10 +2000,12 @@ async fn multi_agent_v2_completion_queues_message_for_direct_parent() {
         )
         .await;
 
-    let expected_message = crate::session_prefix::format_subagent_notification_message(
-        tester_path.as_str(),
+    let expected_message = crate::session_prefix::format_inter_agent_completion_message(
+        worker_path.clone(),
+        tester_path.clone(),
         &AgentStatus::Completed(Some("done".to_string())),
-    );
+    )
+    .expect("completed status should render");
     let expected = (
         worker_thread_id,
         Op::InterAgentCommunication {

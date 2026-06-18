@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::SkillsManager;
+use crate::SkillsService;
 use crate::agent::AgentControl;
 use crate::attestation::AttestationProvider;
 use crate::client::ModelClient;
@@ -12,7 +12,6 @@ use crate::exec_policy::ExecPolicyManager;
 use crate::guardian::GuardianRejection;
 use crate::guardian::GuardianRejectionCircuitBreaker;
 use crate::mcp::McpManager;
-use crate::shell_snapshot::ShellSnapshot;
 use crate::tools::code_mode::CodeModeService;
 use crate::tools::handlers::ToolSearchHandlerCache;
 use crate::tools::network_approval::NetworkApprovalService;
@@ -53,7 +52,6 @@ pub(crate) struct SessionServices {
     pub(crate) hooks: ArcSwap<Hooks>,
     pub(crate) rollout_thread_trace: ThreadTraceContext,
     pub(crate) user_shell: Arc<crate::shell::Shell>,
-    pub(crate) shell_snapshot: ArcSwapOption<ShellSnapshot>,
     pub(crate) show_raw_agent_reasoning: bool,
     pub(crate) exec_policy: Arc<ExecPolicyManager>,
     pub(crate) auth_manager: Arc<AuthManager>,
@@ -63,7 +61,7 @@ pub(crate) struct SessionServices {
     pub(crate) guardian_rejections: Mutex<HashMap<String, GuardianRejection>>,
     pub(crate) guardian_rejection_circuit_breaker: Mutex<GuardianRejectionCircuitBreaker>,
     pub(crate) runtime_handle: Handle,
-    pub(crate) skills_manager: Arc<SkillsManager>,
+    pub(crate) skills_service: Arc<SkillsService>,
     pub(crate) plugins_manager: Arc<PluginsManager>,
     pub(crate) mcp_manager: Arc<McpManager>,
     pub(crate) extensions: Arc<ExtensionRegistry<crate::config::Config>>,
